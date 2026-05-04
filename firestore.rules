@@ -1,0 +1,14 @@
+// firestore.rules
+// Paste this in Firebase Console → Firestore → Rules
+// This locks the DB to only your app (no public write from strangers)
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow read/write from your app only
+    // For now open — tighten later by adding Firebase Auth
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
