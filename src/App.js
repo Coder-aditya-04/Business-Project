@@ -9,6 +9,7 @@ import Attendance from "./components/Attendance";
 import Bills from "./components/Bills";
 import Expenses from "./components/Expenses";
 import Settings from "./components/Settings";
+import Login from "./components/Login";
 import "./App.css";
 
 const NAV = [
@@ -30,6 +31,9 @@ export default function App() {
   const [attendance, setAttendance] = useState({});
   const [expenses,   setExpenses]   = useState([]);
   const [rates,      setRates]      = useState([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    () => localStorage.getItem("swami_auth") === "true"
+  );
   const [loading,    setLoading]    = useState(true);
 
   useEffect(() => {
@@ -137,6 +141,20 @@ export default function App() {
     }, 0);
   }, [members, attendance]);
 
+
+  if (!isAuthenticated) {
+    return (
+      <div className="app">
+        <div className="bubbles-container">
+          {Array.from({ length: 12 }, (_, i) => <div key={i} className="bubble" />)}
+        </div>
+        <Login onLogin={() => {
+          localStorage.setItem("swami_auth", "true");
+          setIsAuthenticated(true);
+        }} />
+      </div>
+    );
+  }
 
   const sharedProps = { viewMonth, viewYear, setViewMonth, setViewYear };
 
