@@ -924,9 +924,12 @@ body {
 
 /* ── Print Styles ───────────────────────────────────────── */
 @media print {
-  body { background: #fff !important; }
+  body { background: #fff !important; margin: 0; padding: 0; }
   .app-header, .app-nav, .bubbles-container, .no-print, .total-bar { display: none !important; }
-  .app-main > *:not(.receipt-overlay) { display: none !important; }
+  
+  /* Hide Bills page siblings so only receipt is visible */
+  .month-nav, .empty, .bill-item { display: none !important; }
+  
   .receipt-overlay {
     position: static;
     background: none;
@@ -936,6 +939,8 @@ body {
     box-shadow: none;
     max-height: none;
     overflow: visible;
+    border: none;
+    padding: 0;
   }
   .app {
     box-shadow: none;
