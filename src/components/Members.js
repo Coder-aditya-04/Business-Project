@@ -36,6 +36,12 @@ export default function Members({ members, db, rates = [] }) {
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const displayedMembers = members.filter(m => 
+    m.name.toLowerCase().includes(search.toLowerCase()) || 
+    (m.phone && m.phone.includes(search))
+  );
 
   async function save() {
     if (!form.name.trim()) { alert("Name is required"); return; }
@@ -90,6 +96,17 @@ export default function Members({ members, db, rates = [] }) {
         <button className="btn-primary" onClick={() => { setShowForm(true); setEditingId(null); setForm(empty); }}>
           + नवीन सदस्य / Add Member
         </button>
+      )}
+
+      {!showForm && members.length > 0 && (
+        <div className="form-group" style={{ marginBottom: 16 }}>
+          <input 
+            value={search} 
+            onChange={e => setSearch(e.target.value)} 
+            placeholder="🔍 Search members by name or phone..." 
+            style={{ borderRadius: 20, padding: "10px 16px" }}
+          />
+        </div>
       )}
 
       {showForm && (
@@ -147,7 +164,11 @@ export default function Members({ members, db, rates = [] }) {
         </div>
       )}
 
-      {members.map(m => (
+      {displayedMembers.length === 0 && search && !showForm && (
+        <div className="empty" style={{ padding: "20px" }}>No members match your search.</div>
+      )}
+
+      {displayedMembers.map(m => (
         <div className="member-item" key={m.id}>
           <div>
             <div className="member-name">{m.name}</div>

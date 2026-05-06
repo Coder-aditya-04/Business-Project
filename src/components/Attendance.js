@@ -8,9 +8,22 @@ export default function Attendance({ members, isPresent, toggleAttendance, viewM
   const maxDay = getMaxDayForMonth(viewYear, viewMonth);
   const isCurrentMonth = viewMonth === today.getMonth() && viewYear === today.getFullYear();
   const [selDay, setSelDay] = useState(today.getDate());
+  const [search, setSearch] = useState("");
 
   const clampedDay = Math.min(selDay, maxDay || totalDays);
   const dayName = new Date(viewYear, viewMonth, clampedDay).toLocaleDateString("en-IN", { weekday:"long" });
+
+  const validMembers = members.filter(m => {
+    if (!m.startDate) return true;
+    const sDate = new Date(m.startDate);
+    const currentDate = new Date(viewYear, viewMonth, clampedDay);
+    return currentDate >= new Date(sDate.getFullYear(), sDate.getMonth(), sDate.getDate());
+  });
+
+  const displayedMembers = validMembers.filter(m => 
+    m.name.toLowerCase().includes(search.toLowerCase()) || 
+    (m.phone && m.phone.includes(search))
+  );
 
   return (
     <div>
@@ -42,12 +55,27 @@ export default function Attendance({ members, isPresent, toggleAttendance, viewM
       ) : (
         <>
           <div style={{ fontWeight:600, fontSize:13, marginBottom:10, color:"rgba(255,255,255,0.7)" }}>
-            {dayName}, {clampedDay} {MSHORT[viewMonth]} — {members.length} members
+            {dayName}, {clampedDay} {MSHORT[viewMonth]} — {validMembers.length} members
           </div>
 
-          {members.length === 0 && <div className="empty"><div className="icon">👥</div>No members. Add from Members tab.</div>}
+          {members.length > 0 && (
+            <div className="form-group" style={{ marginBottom: 16 }}>
+              <input 
+                value={search} 
+                onChange={e => setSearch(e.target.value)} 
+                placeholder="🔍 Search members..." 
+                style={{ borderRadius: 20, padding: "8px 16px" }}
+              />
+            </div>
+          )}
 
-          {members.map(m => {
+          {members.length === 0 && <div className="empty"><div className="icon">👥</div>No members. Add from Members tab.</div>}
+          
+          {displayedMembers.length === 0 && search && (
+            <div className="empty" style={{ padding: "20px" }}>No members match your search.</div>
+          )}
+
+          {displayedMembers.map(m => {
             const present = isPresent(m.id, viewYear, viewMonth, clampedDay);
             return (
               <div key={m.id} className={`att-row ${present ? "present" : "absent"}`} onClick={() => toggleAttendance(m.id, viewYear, viewMonth, clampedDay)}>
