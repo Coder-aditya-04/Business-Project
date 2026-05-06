@@ -30,8 +30,8 @@ const DEMO_MEMBERS = [
   { name:"Mayur",         phone:"", slot:"Evening", milkType:"regular",  quantity:0.5 },
 ];
 
-export default function Members({ members, db }) {
-  const empty = { name:"", phone:"", slot:"Morning", milkType:"premium", quantity:1 };
+export default function Members({ members, db, rates = [] }) {
+  const empty = { name:"", phone:"", slot:"Morning", milkType:"premium", rate: 70, quantity:1, startDate: new Date().toISOString().split('T')[0] };
   const [form, setForm] = useState(empty);
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -46,7 +46,9 @@ export default function Members({ members, db }) {
       phone: form.phone.trim(),
       slot: form.slot,
       milkType: form.milkType,
+      rate: Number(form.rate) || 70,
       quantity: parseFloat(form.quantity) || 1,
+      startDate: form.startDate || new Date().toISOString().split('T')[0],
     });
     setSaving(false);
     cancel();
@@ -58,7 +60,15 @@ export default function Members({ members, db }) {
   }
 
   function edit(m) {
-    setForm({ name:m.name, phone:m.phone||"", slot:m.slot, milkType:m.milkType, quantity:m.quantity });
+    setForm({ 
+      name: m.name, 
+      phone: m.phone||"", 
+      slot: m.slot, 
+      milkType: m.milkType, 
+      rate: m.rate || (m.milkType === "premium" ? 70 : 60),
+      quantity: m.quantity,
+      startDate: m.startDate || new Date().toISOString().split('T')[0]
+    });
     setEditingId(m.id);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior:"smooth" });
@@ -97,9 +107,24 @@ export default function Members({ members, db }) {
           </div>
 
           <div className="form-group">
-            <label>दूध / Milk Type</label>
+            <label>Registration Date (Start Billing From)</label>
+            <input type="date" value={form.startDate} onChange={e => setForm(p=>({...p,startDate:e.target.value}))} />
+          </div>
+
+          <div className="form-group">
+            <label>दूध / Milk Package (Rate)</label>
             <div className="pill-group">
-              {MILK_TYPES.map(([v,lbl]) => <button key={v} className={`pill amber${form.milkType===v?" active":""}`} onClick={()=>setForm(p=>({...p,milkType:v}))}>{lbl}</button>)}
+              {rates.map(r => (
+                <button key={r.id} className={`pill amber${form.rate === r.amount ? " active" : ""}`} onClick={()=>setForm(p=>({...p,rate:r.amount, milkType: "custom"}))}>
+                  {r.label} (₹{r.amount})
+                </button>
+              ))}
+              {rates.length === 0 && (
+                <>
+                  <button className={`pill amber${form.rate === 70 ? " active" : ""}`} onClick={()=>setForm(p=>({...p,rate:70, milkType: "premium"}))}>Premium (₹70)</button>
+                  <button className={`pill amber${form.rate === 60 ? " active" : ""}`} onClick={()=>setForm(p=>({...p,rate:60, milkType: "regular"}))}>Regular (₹60)</button>
+                </>
+              )}
             </div>
           </div>
 
@@ -129,8 +154,9 @@ export default function Members({ members, db }) {
             <div className="member-meta">
               <span className={`badge badge-${m.slot.toLowerCase()}`}>{m.slot}</span>
               {" "}
-              <span className={`badge badge-${m.milkType}`}>{m.milkType==="premium"?"₹70/L":"₹60/L"}</span>
+              <span className={`badge badge-premium`}>₹{m.rate || (m.milkType==="premium"?70:60)}/L</span>
               {" "}{m.quantity}L/session
+              {m.startDate && <div style={{marginTop: 4}}>Started: {new Date(m.startDate).toLocaleDateString("en-IN", { day:'numeric', month:'short' })}</div>}
             </div>
             {m.phone && <div style={{ fontSize:10, color:"rgba(255,255,255,0.3)", marginTop:2 }}>{m.phone}</div>}
           </div>

@@ -8,6 +8,7 @@ import Members from "./components/Members";
 import Attendance from "./components/Attendance";
 import Bills from "./components/Bills";
 import Expenses from "./components/Expenses";
+import Settings from "./components/Settings";
 import "./App.css";
 
 const NAV = [
@@ -16,6 +17,7 @@ const NAV = [
   { id: "attendance", label: "Attendance", icon: "✅" },
   { id: "bills",      label: "Bills",      icon: "🧾" },
   { id: "expenses",   label: "Expenses",   icon: "💸" },
+  { id: "settings",   label: "Settings",   icon: "⚙️" },
 ];
 
 export default function App() {
@@ -27,6 +29,7 @@ export default function App() {
   const [members,    setMembers]    = useState([]);
   const [attendance, setAttendance] = useState({});
   const [expenses,   setExpenses]   = useState([]);
+  const [rates,      setRates]      = useState([]);
   const [loading,    setLoading]    = useState(true);
 
   useEffect(() => {
@@ -42,7 +45,10 @@ export default function App() {
       setExpenses(snap.docs.map(d => ({ id: d.id, ...d.data() })));
       setLoading(false);
     });
-    return () => { unsubMembers(); unsubAtt(); unsubExp(); };
+    const unsubRates = onSnapshot(collection(db, "rates"), snap => {
+      setRates(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+    return () => { unsubMembers(); unsubAtt(); unsubExp(); unsubRates(); };
   }, []);
 
   function attKey(memberId, y, m, d) {
@@ -81,14 +87,27 @@ export default function App() {
 
   function getMemberMonthStats(member, y, mo) {
     const maxDay = getMaxDayForMonth(y, mo);
-    if (maxDay === 0) return { p: 0, a: 0, amount: 0, days: 0, rate: 0, sess: 0 };
+    if (maxDay === 0) return { p: 0, a: 0, amount: 0, days: 0, rate: 0, sess: 0, startDay: 1, maxDay: 0 };
+    
+    let startDay = 1;
+    if (member.startDate) {
+      const sDate = new Date(member.startDate);
+      if (sDate.getFullYear() === y && sDate.getMonth() === mo) {
+        startDay = sDate.getDate();
+      } else if (sDate.getFullYear() > y || (sDate.getFullYear() === y && sDate.getMonth() > mo)) {
+        return { p: 0, a: 0, amount: 0, days: 0, rate: 0, sess: 0, startDay: 1, maxDay: 0 };
+      }
+    }
+
     let p = 0, a = 0;
-    for (let d = 1; d <= maxDay; d++) {
+    for (let d = startDay; d <= maxDay; d++) {
       isPresent(member.id, y, mo, d) ? p++ : a++;
     }
     const sess = member.slot === "Both" ? 2 : 1;
-    const rate = member.milkType === "premium" ? 70 : 60;
-    return { p, a, amount: p * sess * member.quantity * rate, days: maxDay, rate, sess };
+    let rate = member.rate;
+    if (!rate) rate = member.milkType === "premium" ? 70 : 60;
+    
+    return { p, a, amount: p * sess * member.quantity * rate, days: maxDay - startDay + 1, rate, sess, startDay, maxDay };
   }
 
   const monthExpenses = useMemo(() =>
@@ -107,8 +126,13 @@ export default function App() {
     const d = today.getDate(), m = today.getMonth(), y = today.getFullYear();
     return members.reduce((s, mem) => {
       if (!isPresent(mem.id, y, m, d)) return s;
+      if (mem.startDate) {
+        const sDate = new Date(mem.startDate);
+        if (new Date(y, m, d) < new Date(sDate.getFullYear(), sDate.getMonth(), sDate.getDate())) return s;
+      }
       const sess = mem.slot === "Both" ? 2 : 1;
-      const rate = mem.milkType === "premium" ? 70 : 60;
+      let rate = mem.rate;
+      if (!rate) rate = mem.milkType === "premium" ? 70 : 60;
       return s + sess * mem.quantity * rate;
     }, 0);
   }, [members, attendance]);
@@ -139,10 +163,11 @@ export default function App() {
 
       <main className="app-main">
         {tab === "dashboard"  && <Dashboard  {...sharedProps} members={members} monthRevenue={monthRevenue} todayRevenue={todayRevenue} monthExpenses={monthExpenses} getMemberMonthStats={getMemberMonthStats} today={today} />}
-        {tab === "members"    && <Members    members={members} db={db} />}
+        {tab === "members"    && <Members    members={members} db={db} rates={rates} />}
         {tab === "attendance" && <Attendance {...sharedProps} members={members} isPresent={isPresent} toggleAttendance={toggleAttendance} today={today} isDateInFuture={isDateInFuture} getMaxDayForMonth={getMaxDayForMonth} />}
         {tab === "bills"      && <Bills      {...sharedProps} members={members} getMemberMonthStats={getMemberMonthStats} isPresent={isPresent} isDateInFuture={isDateInFuture} getMaxDayForMonth={getMaxDayForMonth} />}
         {tab === "expenses"   && <Expenses   {...sharedProps} expenses={expenses} db={db} />}
+        {tab === "settings"   && <Settings   rates={rates} db={db} />}
       </main>
 
       <nav className="app-nav">
