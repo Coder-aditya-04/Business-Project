@@ -137,13 +137,6 @@ export default function App() {
     }, 0);
   }, [members, attendance]);
 
-  if (loading) return (
-    <div className="loading-screen">
-      <div className="loading-logo">🥛</div>
-      <div className="loading-text">Swami Dairy</div>
-      <div className="loading-sub">Connecting to database...</div>
-    </div>
-  );
 
   const sharedProps = { viewMonth, viewYear, setViewMonth, setViewYear };
 

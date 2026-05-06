@@ -8,7 +8,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
-  background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 40%, #24243e 100%);
+  background: #000;
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -20,7 +20,7 @@ body {
   justify-content: center;
 }
 
-/* ── Bubble Animation Background ────────────────────────── */
+/* ── Ambient Glowing Orbs Background ────────────────────── */
 .bubbles-container {
   position: fixed;
   top: 0; left: 0;
@@ -28,35 +28,30 @@ body {
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
+  background: #000;
 }
 
 .bubble {
   position: absolute;
-  bottom: -100px;
   border-radius: 50%;
-  opacity: 0.15;
-  animation: floatUp linear infinite;
+  filter: blur(80px);
+  opacity: 0.5;
+  animation: floatOrb linear infinite alternate;
 }
 
-.bubble:nth-child(1)  { width: 40px; height: 40px; left: 5%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), #1D9E75); animation-duration: 12s; animation-delay: 0s; }
-.bubble:nth-child(2)  { width: 25px; height: 25px; left: 15%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), #BA7517); animation-duration: 10s; animation-delay: 1s; }
-.bubble:nth-child(3)  { width: 55px; height: 55px; left: 25%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), #1D9E75); animation-duration: 14s; animation-delay: 2s; }
-.bubble:nth-child(4)  { width: 30px; height: 30px; left: 40%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), #E24B4A); animation-duration: 9s;  animation-delay: 0.5s; }
-.bubble:nth-child(5)  { width: 45px; height: 45px; left: 55%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), #1D9E75); animation-duration: 11s; animation-delay: 3s; }
-.bubble:nth-child(6)  { width: 20px; height: 20px; left: 70%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), #BA7517); animation-duration: 8s;  animation-delay: 1.5s; }
-.bubble:nth-child(7)  { width: 50px; height: 50px; left: 80%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), #1D9E75); animation-duration: 13s; animation-delay: 2.5s; }
-.bubble:nth-child(8)  { width: 35px; height: 35px; left: 90%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), #E24B4A); animation-duration: 10s; animation-delay: 0.8s; }
-.bubble:nth-child(9)  { width: 28px; height: 28px; left: 10%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), #BA7517); animation-duration: 15s; animation-delay: 4s; }
-.bubble:nth-child(10) { width: 42px; height: 42px; left: 45%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), #1D9E75); animation-duration: 11s; animation-delay: 3.5s; }
-.bubble:nth-child(11) { width: 22px; height: 22px; left: 65%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), #BA7517); animation-duration: 9s;  animation-delay: 2s; }
-.bubble:nth-child(12) { width: 38px; height: 38px; left: 85%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), #1D9E75); animation-duration: 12s; animation-delay: 1s; }
+.bubble:nth-child(1)  { width: 300px; height: 300px; top: -100px; left: -100px; background: #1D9E75; animation-duration: 14s; }
+.bubble:nth-child(2)  { width: 400px; height: 400px; bottom: -150px; right: -100px; background: #BA7517; animation-duration: 18s; animation-delay: -2s; }
+.bubble:nth-child(3)  { width: 250px; height: 250px; top: 30%; left: 60%; background: #4a00e0; animation-duration: 12s; animation-delay: -5s; }
+.bubble:nth-child(4)  { width: 350px; height: 350px; top: 60%; left: -50px; background: #8e2de2; animation-duration: 20s; animation-delay: -7s; }
+.bubble:nth-child(5)  { width: 200px; height: 200px; top: -50px; right: 20%; background: #00c9ff; animation-duration: 16s; animation-delay: -3s; }
+.bubble:nth-child(6)  { width: 450px; height: 450px; bottom: -200px; left: 20%; background: #92fe9d; animation-duration: 22s; animation-delay: -8s; opacity: 0.3; }
+.bubble:nth-child(n+7) { display: none; }
 
-@keyframes floatUp {
-  0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
-  10%  { opacity: 0.15; }
-  50%  { transform: translateY(-50vh) translateX(20px) scale(1.1); opacity: 0.12; }
-  90%  { opacity: 0.08; }
-  100% { transform: translateY(-110vh) translateX(-20px) scale(0.8); opacity: 0; }
+@keyframes floatOrb {
+  0%   { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(30px, -50px) scale(1.1); }
+  66%  { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(40px, 40px) scale(1.05); }
 }
 
 /* ── Layout ─────────────────────────────────────────────── */
