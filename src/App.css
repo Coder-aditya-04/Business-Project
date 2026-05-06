@@ -1,11 +1,23 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
   background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 40%, #24243e 100%);
   min-height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+
+#root {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 /* ── Bubble Animation Background ────────────────────────── */
@@ -49,12 +61,22 @@ body {
 
 /* ── Layout ─────────────────────────────────────────────── */
 .app {
+  width: 100%;
   max-width: 480px;
   margin: 0 auto;
   min-height: 100vh;
   position: relative;
   z-index: 1;
   padding-bottom: 90px;
+  background: rgba(255,255,255,0.02);
+  box-shadow: 0 0 50px rgba(0,0,0,0.4);
+}
+
+@media (max-width: 480px) {
+  .app {
+    box-shadow: none;
+    background: transparent;
+  }
 }
 
 /* ── Header ─────────────────────────────────────────────── */
@@ -163,6 +185,11 @@ body {
 }
 
 /* ── Glass Cards ────────────────────────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .card {
   background: rgba(255,255,255,0.06);
   backdrop-filter: blur(16px);
@@ -172,7 +199,19 @@ body {
   padding: 16px;
   margin-bottom: 12px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.card:nth-of-type(1) { animation-delay: 0.1s; }
+.card:nth-of-type(2) { animation-delay: 0.2s; }
+.card:nth-of-type(3) { animation-delay: 0.3s; }
+.card:nth-of-type(4) { animation-delay: 0.4s; }
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.08);
 }
 
 .card:active {
@@ -195,6 +234,44 @@ body {
   border: 1px solid rgba(255,255,255,0.1);
   padding: 16px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+  animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat:nth-child(1) { animation-delay: 0.1s; }
+.stat:nth-child(2) { animation-delay: 0.2s; }
+.stat:nth-child(3) { animation-delay: 0.3s; }
+.stat:nth-child(4) { animation-delay: 0.4s; }
+
+.stat::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.stat:hover::before { opacity: 1; }
+
+.stat:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+}
+
+.stat.green {
+  background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(255,255,255,0.04));
+  border: 1px solid rgba(74, 222, 128, 0.2);
+}
+.stat.amber {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(255,255,255,0.04));
+  border: 1px solid rgba(251, 191, 36, 0.2);
+}
+.stat.red {
+  background: linear-gradient(135deg, rgba(248, 113, 113, 0.1), rgba(255,255,255,0.04));
+  border: 1px solid rgba(248, 113, 113, 0.2);
 }
 
 .stat .lbl {
