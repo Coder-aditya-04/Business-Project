@@ -4,7 +4,10 @@ import { MonthPicker } from "./Dashboard";
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
 export default function Bills({ members, getMemberMonthStats, viewMonth, viewYear, setViewMonth, setViewYear, isPresent, isDateInFuture, getMaxDayForMonth }) {
+  const [openId, setOpenId] = useState(null);
   const [receiptMember, setReceiptMember] = useState(null);
+  const fmt = n => "₹" + Math.round(n).toLocaleString("en-IN");
+  const maxDay = getMaxDayForMonth(viewYear, viewMonth);
 
   function getOrdinal(n) {
     const s = ["th","st","nd","rd"];
