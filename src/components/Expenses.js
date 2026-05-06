@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { doc, setDoc, deleteDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from "../firebase";
 import { MonthPicker } from "./Dashboard";
 
 const CATEGORIES = ["Buffalo Feed","Medicine","Labour","Equipment","Transport","Other"];
@@ -22,12 +20,35 @@ export default function Expenses({ expenses, db, viewMonth, viewYear, setViewMon
   function handlePhotoSelect(e) {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Photo must be less than 5MB");
-      return;
-    }
-    setPhotoFile(file);
-    setPhotoPreview(URL.createObjectURL(file));
+    
+    // Convert to Base64 and compress using Canvas
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const MAX_WIDTH = 800; // Resize to max 800px width
+        let width = img.width;
+        let height = img.height;
+        
+        if (width > MAX_WIDTH) {
+          height = Math.round((height * MAX_WIDTH) / width);
+          width = MAX_WIDTH;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Compress as JPEG (0.7 quality) to keep size well under 1MB Firestore limit
+        const base64String = canvas.toDataURL("image/jpeg", 0.7);
+        setPhotoFile(base64String);
+        setPhotoPreview(base64String);
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 
   function removePhoto() {
@@ -39,24 +60,13 @@ export default function Expenses({ expenses, db, viewMonth, viewYear, setViewMon
     if (!form.desc.trim() || !form.amount) { alert("Description and amount required"); return; }
     setSaving(true);
     const id = Date.now().toString();
-    let photoURL = "";
-
-    try {
-      if (photoFile) {
-        const storageRef = ref(storage, `expenses/${id}_${photoFile.name}`);
-        const snapshot = await uploadBytes(storageRef, photoFile);
-        photoURL = await getDownloadURL(snapshot.ref);
-      }
-    } catch (err) {
-      console.error("Photo upload failed:", err);
-    }
 
     await setDoc(doc(db,"expenses",id), {
       category: form.category,
       desc: form.desc.trim(),
       amount: parseFloat(form.amount),
       date: form.date,
-      photoURL: photoURL || null,
+      photoURL: photoFile || null, // Base64 string directly in document
     });
 
     setSaving(false);
